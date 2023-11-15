@@ -16,11 +16,9 @@ func main() {
 	}
 	ctx = ctxcache.WithCache[int64, string](ctx, getNumber)
 
-	var getNumberCache = func(ctx context.Context, n int64) string {
-		return ctxcache.FromContext(ctx, getNumber)(n)
-	}
+	var getNumberCache = ctxcache.FromContext(ctx, getNumber)
 
-	getNumberCache(ctx, 1)
-	getNumberCache(ctx, 1)
-	getNumberCache(ctx, 1)
+	getNumberCache(1)
+	getNumberCache(1)
+	getNumberCache(1)
 }
