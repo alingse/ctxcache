@@ -6,7 +6,6 @@ import (
 )
 
 type cache[K comparable, V any] struct {
-	context.Context
 	lock   sync.RWMutex
 	data   map[K]V
 	loader func(K) V
@@ -29,19 +28,23 @@ func (c *cache[K, V]) cacheLoader(k K) V {
 	return v
 }
 
-func WithCache[K comparable, V any](ctx context.Context, f func(K) V) context.Context {
+type CacheFunc[K comparable, V any] func(K) V
+
+var ctxKey = &struct{}{}
+
+func WithCache[K comparable, V any](ctx context.Context, f CacheFunc[K, V]) (context.Context, CacheFunc[K, V]) {
 	cache := &cache[K, V]{
-		Context: ctx,
-		loader:  f,
-		data:    make(map[K]V),
+		loader: f,
+		data:   make(map[K]V),
 	}
-	return cache
+	ctx = context.WithValue(ctx, ctxKey, cache)
+	return ctx, cache.cacheLoader
 }
 
-func FromContext[K comparable, V any](ctx context.Context, f func(K) V) func(K) V {
-	cache, ok := ctx.(*cache[K, V])
+func FromContext[K comparable, V any](ctx context.Context) (CacheFunc[K, V], bool) {
+	cache, ok := ctx.Value(ctxKey).(*cache[K, V])
 	if !ok {
-		return f
+		return nil, false
 	}
-	return cache.cacheLoader
+	return cache.cacheLoader, true
 }
