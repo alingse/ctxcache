@@ -14,11 +14,15 @@ func main() {
 		fmt.Printf("got number: %d \n", n)
 		return strconv.FormatInt(n, 10)
 	}
-	ctx = ctxcache.WithCache[int64, string](ctx, getNumber)
+	ctx, cacheF := ctxcache.WithCache[int64, string](ctx, getNumber)
+	cacheF(1)
+	cacheF(1)
+	cacheF(2)
 
-	var getNumberCache = ctxcache.FromContext(ctx, getNumber)
+	ctx = context.WithValue(ctx, struct{}{}, 1)
 
+	getNumberCache, _ := ctxcache.FromContext[int64, string](ctx)
 	getNumberCache(1)
 	getNumberCache(1)
-	getNumberCache(1)
+	getNumberCache(2)
 }
