@@ -30,18 +30,16 @@ func (c *cache[K, V]) cacheLoader(k K) V {
 
 type CacheFunc[K comparable, V any] func(K) V
 
-var ctxKey = &struct{}{}
-
-func WithCache[K comparable, V any](ctx context.Context, f CacheFunc[K, V]) (context.Context, CacheFunc[K, V]) {
+func WithCache[K comparable, V any](ctx context.Context, ctxKey any, f CacheFunc[K, V]) context.Context {
 	cache := &cache[K, V]{
 		loader: f,
 		data:   make(map[K]V),
 	}
 	ctx = context.WithValue(ctx, ctxKey, cache)
-	return ctx, cache.cacheLoader
+	return ctx
 }
 
-func FromContext[K comparable, V any](ctx context.Context) (CacheFunc[K, V], bool) {
+func FromContext[K comparable, V any](ctx context.Context, ctxKey any) (CacheFunc[K, V], bool) {
 	cache, ok := ctx.Value(ctxKey).(*cache[K, V])
 	if !ok {
 		return nil, false

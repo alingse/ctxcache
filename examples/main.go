@@ -8,21 +8,28 @@ import (
 	"github.com/alingse/ctxcache"
 )
 
+var funcID = "get_number"
+
+func getNumber(n int64) string {
+	fmt.Printf("got number: %d \n", n)
+	return strconv.FormatInt(n, 10)
+}
+
+func callGetNumber(ctx context.Context, n int64) {
+	getNumberCache, _ := ctxcache.FromContext[int64, string](ctx, funcID)
+	getNumberCache(n)
+}
+
 func main() {
 	var ctx = context.Background()
-	var getNumber = func(n int64) string {
-		fmt.Printf("got number: %d \n", n)
-		return strconv.FormatInt(n, 10)
-	}
-	ctx, cacheF := ctxcache.WithCache[int64, string](ctx, getNumber)
-	cacheF(1)
-	cacheF(1)
-	cacheF(2)
 
-	ctx = context.WithValue(ctx, struct{}{}, 1)
+	// register funcID' cache
+	ctx = ctxcache.WithCache[int64, string](ctx, funcID, getNumber)
 
-	getNumberCache, _ := ctxcache.FromContext[int64, string](ctx)
-	getNumberCache(1)
-	getNumberCache(1)
-	getNumberCache(2)
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	callGetNumber(ctx, 1)
+	callGetNumber(ctx, 1)
+	callGetNumber(ctx, 2)
 }
