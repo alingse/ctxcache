@@ -21,7 +21,7 @@ func computeExpensive(n int) string {
 }
 
 func main() {
-	fmt.Println("=== FromContextLoader Example ===\n")
+	fmt.Println("=== FromContextLoader Example ===")
 
 	// Example 1: With cache enabled
 	fmt.Println("Example 1: With cache enabled")
