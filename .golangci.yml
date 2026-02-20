@@ -1,0 +1,40 @@
+version: "2"
+
+run:
+  concurrency: 4
+  timeout: 5m
+  tests: true
+
+output:
+  formats:
+    text:
+      path: stdout
+      print-linter-name: true
+
+linters:
+  default: all
+  disable:
+    # 以下 linter 保持禁用（需要人工确认或改动较大）
+    - depguard         # import 限制策略，小项目不需要
+    - mnd              # magic numbers，测试代码中常见且无害
+    - testpackage      # 测试包命名规范，需改包名为 _test
+    - varnamelen       # 变量名长度检查，测试代码短变量名正常
+    - wsl              # deprecated, replaced by wsl_v5
+    - wsl_v5           # whitespace/cuddle 风格限制严格
+
+    # TODO 待处理
+    - godox            # TODO 注释检测（cache.go 中有 TODO）
+    - exhaustruct      # struct 字段完整性
+    - ireturn          # 返回泛型接口检查
+
+  exclusions:
+    paths:
+      - vendor/
+      - third_party/
+      - testdata/
+      - examples/
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

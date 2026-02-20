@@ -1,3 +1,4 @@
+// Package ctxcache provides a lightweight context-level cache library.
 package ctxcache
 
 import (
@@ -16,6 +17,7 @@ func (c *cache[K, V]) cacheLoader(k K) V {
 	v, ok := c.data[k]
 	if ok {
 		c.lock.RUnlock()
+
 		return v
 	}
 	c.lock.RUnlock()
@@ -28,24 +30,30 @@ func (c *cache[K, V]) cacheLoader(k K) V {
 	return v
 }
 
+// FuncID is a unique identifier for a cached function.
 type FuncID string
 
+// CacheFunc is the function signature for cached functions.
 type CacheFunc[K comparable, V any] func(K) V
 
+// WithCache registers a cached function in the context.
 func WithCache[K comparable, V any](ctx context.Context, ctxKey FuncID, f CacheFunc[K, V]) context.Context {
 	cache := &cache[K, V]{
 		loader: f,
 		data:   make(map[K]V),
 	}
 	ctx = context.WithValue(ctx, ctxKey, cache)
+
 	return ctx
 }
 
+// FromContext retrieves a cached function from the context.
 func FromContext[K comparable, V any](ctx context.Context, ctxKey FuncID) (CacheFunc[K, V], bool) {
 	cache, ok := ctx.Value(ctxKey).(*cache[K, V])
 	if !ok {
 		return nil, false
 	}
+
 	return cache.cacheLoader, true
 }
 
@@ -57,5 +65,6 @@ func FromContextLoader[K comparable, V any](ctx context.Context, ctxKey FuncID, 
 	if !ok {
 		return f
 	}
+
 	return cache.cacheLoader
 }

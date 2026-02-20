@@ -7,6 +7,7 @@ import (
 )
 
 func TestFromContext_NotFound(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	fn, ok := FromContext[int, string](ctx, FuncID("nonexistent"))
 	if ok {
@@ -18,10 +19,12 @@ func TestFromContext_NotFound(t *testing.T) {
 }
 
 func TestWithCache_Basic(t *testing.T) {
+	t.Parallel()
 	callCount := 0
 	f := func(k int) string {
 		callCount++
-		return "value-" + string(rune('0'+k))
+
+		return "value-" + string(rune('0'+k)) //nolint:gosec // Safe: k is 0-9 in test
 	}
 
 	ctx := context.Background()
@@ -49,10 +52,12 @@ func TestWithCache_Basic(t *testing.T) {
 }
 
 func TestWithCache_MultipleKeys(t *testing.T) {
+	t.Parallel()
 	callCount := 0
 	f := func(k int) string {
 		callCount++
-		return "value-" + string(rune('0'+k))
+
+		return "value-" + string(rune('0'+k)) //nolint:gosec // Safe: k is 0-9 in test
 	}
 
 	ctx := context.Background()
@@ -82,13 +87,15 @@ func TestWithCache_MultipleKeys(t *testing.T) {
 }
 
 func TestConcurrent(t *testing.T) {
+	t.Parallel()
 	callCount := 0
 	var mu sync.Mutex
 	f := func(k int) string {
 		mu.Lock()
 		callCount++
 		mu.Unlock()
-		return "value-" + string(rune('0'+k))
+
+		return "value-" + string(rune('0'+k)) //nolint:gosec // Safe: k is 0-9 in test
 	}
 
 	ctx := context.Background()
@@ -127,11 +134,12 @@ func TestConcurrent(t *testing.T) {
 }
 
 func TestMultipleCaches(t *testing.T) {
+	t.Parallel()
 	f1 := func(k int) string {
-		return "cache1-" + string(rune('0'+k))
+		return "cache1-" + string(rune('0'+k)) //nolint:gosec // Safe: k is 0-9 in test
 	}
 	f2 := func(k int) string {
-		return "cache2-" + string(rune('0'+k))
+		return "cache2-" + string(rune('0'+k)) //nolint:gosec // Safe: k is 0-9 in test
 	}
 
 	ctx := context.Background()
@@ -156,10 +164,12 @@ func TestMultipleCaches(t *testing.T) {
 }
 
 func TestFromContextLoader_WithCache(t *testing.T) {
+	t.Parallel()
 	callCount := 0
 	f := func(k int) string {
 		callCount++
-		return "value-" + string(rune('0'+k))
+
+		return "value-" + string(rune('0'+k)) //nolint:gosec // Safe: k is 0-9 in test
 	}
 
 	ctx := context.Background()
@@ -187,10 +197,12 @@ func TestFromContextLoader_WithCache(t *testing.T) {
 }
 
 func TestFromContextLoader_WithoutCache(t *testing.T) {
+	t.Parallel()
 	callCount := 0
 	f := func(k int) string {
 		callCount++
-		return "value-" + string(rune('0'+k))
+
+		return "value-" + string(rune('0'+k)) //nolint:gosec // Safe: k is 0-9 in test
 	}
 
 	ctx := context.Background()
@@ -210,11 +222,13 @@ func TestFromContextLoader_WithoutCache(t *testing.T) {
 }
 
 func TestFromContextLoader_Behavior(t *testing.T) {
+	t.Parallel()
 	// Test that WithCache and FromContextLoader work together correctly
 	callCount := 0
 	originalFunc := func(k int) string {
 		callCount++
-		return "original-" + string(rune('0'+k))
+
+		return "original-" + string(rune('0'+k)) //nolint:gosec // Safe: k is 0-9 in test
 	}
 
 	ctx := context.Background()
