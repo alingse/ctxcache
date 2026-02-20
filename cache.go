@@ -41,10 +41,21 @@ func WithCache[K comparable, V any](ctx context.Context, ctxKey FuncID, f CacheF
 	return ctx
 }
 
-func FromContext[K comparable, V any](ctx context.Context, ctxKey FuncID, f CacheFunc[K, V]) (CacheFunc[K, V], bool) {
+func FromContext[K comparable, V any](ctx context.Context, ctxKey FuncID) (CacheFunc[K, V], bool) {
 	cache, ok := ctx.Value(ctxKey).(*cache[K, V])
 	if !ok {
-		return f, false
+		return nil, false
 	}
 	return cache.cacheLoader, true
+}
+
+// FromContextLoader returns a cached function, or the original loader if cache doesn't exist.
+// This is a convenience function that always returns a callable function without needing
+// to check the bool return value.
+func FromContextLoader[K comparable, V any](ctx context.Context, ctxKey FuncID, f CacheFunc[K, V]) CacheFunc[K, V] {
+	cache, ok := ctx.Value(ctxKey).(*cache[K, V])
+	if !ok {
+		return f
+	}
+	return cache.cacheLoader
 }
